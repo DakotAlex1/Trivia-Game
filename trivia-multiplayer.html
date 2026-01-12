@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIVIA CLASH - MULTIPLAYER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght:700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-magenta: #ff00ff;
+            --neon-yellow: #ffff00;
+            --neon-green: #00ff00;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #050505;
+            --grid-color: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: var(--dark-bg);
+            color: var(--neon-cyan);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    var(--grid-color) 2px,
+                    var(--grid-color) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            animation: glitch 3s infinite;
+            text-shadow: 
+                0 0 10px var(--neon-cyan),
+                0 0 20px var(--neon-cyan),
+                0 0 30px var(--neon-cyan),
+                0 0 40px var(--neon-magenta);
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% {
+                transform: translate(0);
+            }
+            92% {
+                transform: translate(-2px, 2px);
+            }
+            94% {
+                transform: translate(2px, -2px);
+            }
+            96% {
+                transform: translate(-2px, -2px);
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--neon-magenta);
+            margin-bottom: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes kirbyBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .screen {
+            background: var(--darker-bg);
+            border: 3px solid var(--neon-cyan);
+            padding: 2rem;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow), var(--neon-cyan));
+            z-index: -1;
+            animation: borderRotate 3s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes borderRotate {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            background: var(--dark-bg);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            border-color: var(--neon-magenta);
+        }
+
+        button {
+            width: 100%;
+            padding: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--dark-bg);
+            border: 3px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--neon-cyan);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+            z-index: -1;
+        }
+
+        button:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        button:hover {
+            color: var(--dark-bg);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .room-id-display {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid var(--neon-yellow);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.3em;
+            color: var(--neon-yellow);
+        }
+
+        .players-list {
+            margin: 1.5rem 0;
+        }
+
+        .players-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-yellow);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 0.2em;
+        }
+
+        .player-item {
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 3px solid var(--neon-cyan);
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-item.ready {
+            border-left-color: var(--neon-green);
+        }
+
+        .player-status {
+            font-size: 0.9rem;
+            color: var(--neon-green);
+        }
+
+        .question-container {
+            margin: 2rem 0;
+        }
+
+        .question-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--neon-yellow);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            color: var(--neon-cyan);
+        }
+
+        .answers {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .answer-btn {
+            padding: 1.2rem;
+            text-align: left;
+            font-size: 1.1rem;
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+        }
+
+        .answer-btn::before {
+            background: var(--neon-magenta);
+        }
+
+        .answer-btn.correct {
+            border-color: #00ff00;
+            color: #00ff00;
+            animation: correctPulse 0.5s;
+        }
+
+        .answer-btn.incorrect {
+            border-color: #ff0000;
+            color: #ff0000;
+            animation: shake 0.5s;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            color: var(--neon-yellow);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .live-scores {
+            background: rgba(255, 0, 255, 0.05);
+            border: 2px solid var(--neon-magenta);
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .live-scores-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-magenta);
+            margin-bottom: 0.8rem;
+            text-align: center;
+            font-size: 1rem;
+            letter-spacing: 0.2em;
+        }
+
+        .live-score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            margin-bottom: 0.3rem;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        .winner-announcement {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .winner-crown {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: crownFloat 2s infinite;
+        }
+
+        @keyframes crownFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        .winner-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--neon-yellow);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            animation: winnerGlow 1.5s infinite;
+        }
+
+        @keyframes winnerGlow {
+            0%, 100% {
+                text-shadow: 
+                    0 0 20px var(--neon-yellow),
+                    0 0 40px var(--neon-yellow);
+            }
+            50% {
+                text-shadow: 
+                    0 0 30px var(--neon-yellow),
+                    0 0 60px var(--neon-yellow),
+                    0 0 80px var(--neon-yellow);
+            }
+        }
+
+        .winner-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: var(--neon-cyan);
+            margin: 1rem 0;
+            text-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .winner-score {
+            font-size: 4rem;
+            color: var(--neon-magenta);
+            font-weight: 900;
+            text-shadow: 0 0 30px var(--neon-magenta);
+        }
+
+        .final-standings {
+            margin-top: 2rem;
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid var(--neon-cyan);
+            padding: 1.5rem;
+        }
+
+        .standings-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-cyan);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.2em;
+        }
+
+        .standing-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        .standing-item.first {
+            border-left-color: var(--neon-yellow);
+            background: rgba(255, 255, 0, 0.1);
+        }
+
+        .standing-rank {
+            color: var(--neon-yellow);
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .standing-name {
+            flex: 1;
+            color: var(--neon-cyan);
+        }
+
+        .standing-score {
+            color: var(--neon-magenta);
+            font-weight: 700;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .info-text {
+            text-align: center;
+            color: var(--neon-cyan);
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .screen {
+                padding: 1.5rem;
+            }
+
+            .winner-title {
+                font-size: 1.8rem;
+            }
+
+            .winner-name {
+                font-size: 2rem;
+            }
+
+            .winner-score {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TRIVIA CLASH</h1>
+        <div style="text-align: center; font-size: 4rem; margin: -1rem 0 1rem 0; animation: kirbyBounce 1s infinite;">🎀</div>
+        <p class="subtitle">Hosted by Kirby - Live Multiplayer Arena</p>
+
+        <div class="screen">
+            <!-- Start Screen -->
+            <div id="startScreen">
+                <input type="text" id="playerName" placeholder="Enter Your Codename" maxlength="20">
+                <button onclick="createRoom()">► CREATE ROOM ◄</button>
+                <div style="text-align: center; margin: 1.5rem 0; color: var(--neon-yellow);">- OR -</div>
+                <input type="text" id="roomIdInput" placeholder="Enter Room Code" maxlength="10">
+                <button onclick="joinRoom()">► JOIN ROOM ◄</button>
+            </div>
+
+            <!-- Lobby Screen -->
+            <div id="lobbyScreen" class="hidden">
+                <div class="room-id-display">
+                    ROOM: <span id="roomIdDisplay"></span>
+                </div>
+                
+                <div class="players-list">
+                    <div class="players-title">◆ CONNECTED PLAYERS ◆</div>
+                    <div id="playersList"></div>
+                </div>
+
+                <p class="info-text">Waiting for all players to ready up...</p>
+                
+                <button id="readyButton" onclick="toggleReady()">► READY ◄</button>
+                <button onclick="leaveRoom()" style="margin-top: 1rem; border-color: #ff0000; color: #ff0000;">► LEAVE ROOM ◄</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="hidden">
+                <div class="score-display">
+                    <div class="score-item">
+                        <div class="score-label">QUESTION</div>
+                        <div class="score-value" id="questionCounter">1/10</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">YOUR SCORE</div>
+                        <div class="score-value" id="currentScore">0</div>
+                    </div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-number" id="questionNumber">QUESTION 01</div>
+                    <div class="question-text" id="questionText"></div>
+                </div>
+
+                <div class="answers" id="answersContainer"></div>
+
+                <div class="live-scores">
+                    <div class="live-scores-title">◆ LIVE STANDINGS ◆</div>
+                    <div id="liveScoresList"></div>
+                </div>
+            </div>
+
+            <!-- Winner Screen -->
+            <div id="winnerScreen" class="hidden">
+                <div class="winner-announcement">
+                    <div class="winner-crown">👑</div>
+                    <div class="winner-title">CHAMPION</div>
+                    <div class="winner-name" id="winnerName"></div>
+                    <div class="winner-score" id="winnerScore"></div>
+                </div>
+
+                <div class="final-standings">
+                    <div class="standings-title">◆ FINAL STANDINGS ◆</div>
+                    <div id="finalStandingsList"></div>
+                </div>
+
+                <button onclick="returnToStart()" style="margin-top: 2rem;">► NEW GAME ◄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const triviaQuestions = [
+            {
+                question: "What iconic Seattle landmark was built for the 1962 World's Fair?",
+                answers: ["Space Needle", "Pike Place Market", "Smith Tower", "Columbia Center"],
+                correct: 0
+            },
+            {
+                question: "Which famous coffee company was founded in Seattle's Pike Place Market in 1971?",
+                answers: ["Peet's Coffee", "Dunkin' Donuts", "Starbucks", "Seattle's Best"],
+                correct: 2
+            },
+            {
+                question: "What is the name of Seattle's NFL team?",
+                answers: ["Seahawks", "Mariners", "Sounders", "Kraken"],
+                correct: 0
+            },
+            {
+                question: "Mount Rainier, visible from Seattle on clear days, is what type of geological formation?",
+                answers: ["Dormant Volcano", "Active Volcano", "Mountain Range", "Glacier"],
+                correct: 1
+            },
+            {
+                question: "Which legendary guitarist, born in Seattle, is known for his performance at Woodstock?",
+                answers: ["Eddie Vedder", "Kurt Cobain", "Jimi Hendrix", "Chris Cornell"],
+                correct: 2
+            },
+            {
+                question: "What body of water does Seattle sit on the eastern shore of?",
+                answers: ["Pacific Ocean", "Puget Sound", "Lake Washington", "Lake Union"],
+                correct: 1
+            },
+            {
+                question: "Which major technology company has its headquarters in the Seattle metro area?",
+                answers: ["Apple", "Google", "Microsoft", "Meta"],
+                correct: 2
+            },
+            {
+                question: "What is Seattle's famous fish market called, known for flying fish?",
+                answers: ["Seattle Fish Co.", "Pike Place Fish Market", "Fisherman's Terminal", "The Crab Pot"],
+                correct: 1
+            },
+            {
+                question: "Which music genre became internationally famous due to Seattle bands in the early 1990s?",
+                answers: ["Grunge", "Jazz", "Hip Hop", "Disco"],
+                correct: 0
+            },
+            {
+                question: "What is the average annual rainfall in Seattle?",
+                answers: ["25 inches", "37 inches", "52 inches", "68 inches"],
+                correct: 1
+            },
+            {
+                question: "What is Seattle's nickname?",
+                answers: ["The Rain City", "The Emerald City", "The Coffee Capital", "The Tech Hub"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle band released the album 'Nevermind' in 1991?",
+                answers: ["Pearl Jam", "Soundgarden", "Nirvana", "Alice in Chains"],
+                correct: 2
+            },
+            {
+                question: "What year was Seattle founded?",
+                answers: ["1851", "1869", "1889", "1901"],
+                correct: 0
+            },
+            {
+                question: "Which island is accessible from Seattle via ferry?",
+                answers: ["Vashon Island", "Whidbey Island", "Bainbridge Island", "All of the above"],
+                correct: 3
+            },
+            {
+                question: "What is the name of Seattle's MLB team?",
+                answers: ["Seahawks", "Mariners", "Sounders", "Supersonics"],
+                correct: 1
+            },
+            {
+                question: "Which famous Seattle market opened in 1907?",
+                answers: ["Pike Place Market", "University District Market", "Ballard Farmers Market", "Fremont Sunday Market"],
+                correct: 0
+            },
+            {
+                question: "What is the tallest building in Seattle?",
+                answers: ["Space Needle", "Columbia Center", "Smith Tower", "1201 Third Avenue"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle neighborhood is known for the Fremont Troll?",
+                answers: ["Capitol Hill", "Fremont", "Ballard", "Queen Anne"],
+                correct: 1
+            },
+            {
+                question: "What year did the Seattle SuperSonics win their only NBA Championship?",
+                answers: ["1975", "1979", "1983", "1996"],
+                correct: 1
+            },
+            {
+                question: "Which university is located in Seattle?",
+                answers: ["University of Washington", "Washington State University", "Seattle Pacific University", "Both A and C"],
+                correct: 3
+            },
+            {
+                question: "What is the name of Seattle's MLS soccer team?",
+                answers: ["Seattle FC", "Sounders FC", "Emerald FC", "Reign FC"],
+                correct: 1
+            },
+            {
+                question: "Which lake borders Seattle to the east?",
+                answers: ["Lake Union", "Lake Washington", "Green Lake", "Lake Sammamish"],
+                correct: 1
+            },
+            {
+                question: "What was Seattle named after?",
+                answers: ["Chief Seattle", "George Seattle", "Seattle Bay", "Seattle Valley"],
+                correct: 0
+            },
+            {
+                question: "Which iconic Seattle band featured Eddie Vedder as lead vocalist?",
+                answers: ["Nirvana", "Soundgarden", "Pearl Jam", "Alice in Chains"],
+                correct: 2
+            },
+            {
+                question: "What is the name of Seattle's NHL team?",
+                answers: ["Kraken", "Freeze", "Orcas", "Glaciers"],
+                correct: 0
+            },
+            {
+                question: "Which Seattle neighborhood is known for its LGBTQ+ culture and nightlife?",
+                answers: ["Fremont", "Ballard", "Capitol Hill", "Queen Anne"],
+                correct: 2
+            },
+            {
+                question: "What is the name of the Seattle monorail's two stations?",
+                answers: ["Downtown and Airport", "Westlake Center and Seattle Center", "Pike Place and Space Needle", "University and Stadium"],
+                correct: 1
+            },
+            {
+                question: "Which company did Bill Gates co-found in the Seattle area?",
+                answers: ["Apple", "Amazon", "Microsoft", "Boeing"],
+                correct: 2
+            },
+            {
+                question: "What year did Amazon move its headquarters to Seattle?",
+                answers: ["1994", "1999", "2004", "2010"],
+                correct: 0
+            },
+            {
+                question: "Which Seattle museum features a music-focused experience?",
+                answers: ["Seattle Art Museum", "Museum of Pop Culture (MoPOP)", "Burke Museum", "Wing Luke Museum"],
+                correct: 1
+            },
+            {
+                question: "What is the name of the famous gum wall in Seattle?",
+                answers: ["Pike Place Gum Wall", "Bubble Wall", "Seattle Gum Art", "Market Gum Display"],
+                correct: 0
+            },
+            {
+                question: "Which aircraft company has major facilities in the Seattle area?",
+                answers: ["Airbus", "Lockheed Martin", "Boeing", "Northrop Grumman"],
+                correct: 2
+            },
+            {
+                question: "What is the elevation of the Space Needle's observation deck?",
+                answers: ["420 feet", "520 feet", "620 feet", "720 feet"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle park is the oldest in the city?",
+                answers: ["Discovery Park", "Volunteer Park", "Denny Park", "Gas Works Park"],
+                correct: 2
+            },
+            {
+                question: "What was the original name of the Space Needle during planning?",
+                answers: ["Sky Tower", "Space Cage", "The Needle", "Seattle Spire"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle waterfront attraction features a giant Ferris wheel?",
+                answers: ["Seattle Great Wheel", "Pike Place Wheel", "Waterfront Wonder", "Emerald Wheel"],
+                correct: 0
+            },
+            {
+                question: "What is the name of Seattle's light rail system?",
+                answers: ["Metro Rail", "Link Light Rail", "Sound Transit", "Seattle Express"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle neighborhood is known for its Scandinavian heritage?",
+                answers: ["Fremont", "Ballard", "Wallingford", "Magnolia"],
+                correct: 1
+            },
+            {
+                question: "What year did Starbucks open its first store?",
+                answers: ["1969", "1971", "1975", "1980"],
+                correct: 1
+            },
+            {
+                question: "Which famous Seattle venue hosts concerts and sporting events?",
+                answers: ["KeyArena", "Climate Pledge Arena", "T-Mobile Park", "Lumen Field"],
+                correct: 1
+            },
+            {
+                question: "What is the name of Seattle's largest public park?",
+                answers: ["Green Lake Park", "Discovery Park", "Seward Park", "Lincoln Park"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle bridge is known for its distinctive blue color?",
+                answers: ["Aurora Bridge", "Fremont Bridge", "Ballard Bridge", "University Bridge"],
+                correct: 1
+            },
+            {
+                question: "What is the official flower of Seattle?",
+                answers: ["Rose", "Dahlia", "Tulip", "Daffodil"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle library was designed by architect Rem Koolhaas?",
+                answers: ["University Branch", "Central Library", "Ballard Branch", "Capitol Hill Branch"],
+                correct: 1
+            },
+            {
+                question: "What is the name of the sculpture at Seattle Center with a giant spoon?",
+                answers: ["Spoon Bridge", "The Spatula", "Big Spoon", "There is no spoon sculpture"],
+                correct: 3
+            },
+            {
+                question: "Which Seattle neighborhood features houseboats on Lake Union?",
+                answers: ["Eastlake", "Wallingford", "Fremont", "All of the above"],
+                correct: 3
+            },
+            {
+                question: "What year was the Great Seattle Fire?",
+                answers: ["1889", "1899", "1909", "1919"],
+                correct: 0
+            },
+            {
+                question: "Which Seattle coffee chain is known for its 'no WiFi' policy at some locations?",
+                answers: ["Starbucks", "Tully's", "Caffe Vita", "Zeitgeist"],
+                correct: 3
+            },
+            {
+                question: "What is the name of Seattle's annual seafood festival?",
+                answers: ["Fishfest", "Seafair", "Pike Place Seafood Festival", "Salmon Days"],
+                correct: 1
+            },
+            {
+                question: "Which Seattle stadium is home to the Seahawks?",
+                answers: ["T-Mobile Park", "Lumen Field", "Climate Pledge Arena", "Husky Stadium"],
+                correct: 1
+            }
+        ];
+
+        let currentPlayer = '';
+        let currentRoomId = '';
+        let currentQuestion = 0;
+        let score = 0;
+        let isReady = false;
+        let updateInterval = null;
+        let gameQuestions = [];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function generateRoomId() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        async function createRoom() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('ENTER YOUR CODENAME TO PROCEED');
+                return;
+            }
+
+            currentPlayer = name;
+            currentRoomId = generateRoomId();
+            
+            const roomData = {
+                id: currentRoomId,
+                players: {},
+                started: false,
+                finished: false,
+                createdAt: Date.now()
+            };
+            
+            roomData.players[currentPlayer] = {
+                name: currentPlayer,
+                score: 0,
+                ready: false,
+                currentQuestion: 0
+            };
+
+            try {
+                await window.storage.set(`room:${currentRoomId}`, JSON.stringify(roomData), true);
+                showLobby();
+            } catch (error) {
+                console.error('Error creating room:', error);
+                alert('Error creating room. Please try again.');
+            }
+        }
+
+        async function joinRoom() {
+            const nameInput = document.getElementById('playerName');
+            const roomInput = document.getElementById('roomIdInput');
+            const name = nameInput.value.trim();
+            const roomId = roomInput.value.trim().toUpperCase();
+            
+            if (!name) {
+                alert('ENTER YOUR CODENAME TO PROCEED');
+                return;
+            }
+            
+            if (!roomId) {
+                alert('ENTER A ROOM CODE');
+                return;
+            }
+
+            try {
+                const roomData = await window.storage.get(`room:${roomId}`, true);
+                
+                if (!roomData) {
+                    alert('ROOM NOT FOUND');
+                    return;
+                }
+
+                const room = JSON.parse(roomData.value);
+                
+                if (room.started) {
+                    alert('GAME ALREADY IN PROGRESS');
+                    return;
+                }
+
+                currentPlayer = name;
+                currentRoomId = roomId;
+                
+                room.players[currentPlayer] = {
+                    name: currentPlayer,
+                    score: 0,
+                    ready: false,
+                    currentQuestion: 0
+                };
+
+                await window.storage.set(`room:${currentRoomId}`, JSON.stringify(room), true);
+                showLobby();
+            } catch (error) {
+                console.error('Error joining room:', error);
+                alert('ROOM NOT FOUND');
+            }
+        }
+
+        function showLobby() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('lobbyScreen').classList.remove('hidden');
+            document.getElementById('roomIdDisplay').textContent = currentRoomId;
+            
+            updateInterval = setInterval(updateLobby, 1000);
+        }
+
+        async function updateLobby() {
+            try {
+                const roomData = await window.storage.get(`room:${currentRoomId}`, true);
+                if (!roomData) return;
+
+                const room = JSON.parse(roomData.value);
+                
+                if (room.started) {
+                    clearInterval(updateInterval);
+                    startMultiplayerGame();
+                    return;
+                }
+
+                const playersList = document.getElementById('playersList');
+                playersList.innerHTML = '';
+
+                Object.values(room.players).forEach(player => {
+                    const div = document.createElement('div');
+                    div.className = `player-item ${player.ready ? 'ready' : ''}`;
+                    div.innerHTML = `
+                        <span>${player.name}</span>
+                        <span class="player-status">${player.ready ? '✓ READY' : 'WAITING...'}</span>
+                    `;
+                    playersList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error updating lobby:', error);
+            }
+        }
+
+        async function toggleReady() {
+            isReady = !isReady;
+            
+            try {
+                const roomData = await window.storage.get(`room:${currentRoomId}`, true);
+                if (!roomData) return;
+
+                const room = JSON.parse(roomData.value);
+                room.players[currentPlayer].ready = isReady;
+
+                const allReady = Object.values(room.players).every(p => p.ready);
+                const hasPlayers = Object.keys(room.players).length >= 1;
+
+                if (allReady && hasPlayers) {
+                    room.started = true;
+                }
+
+                await window.storage.set(`room:${currentRoomId}`, JSON.stringify(room), true);
+
+                const readyButton = document.getElementById('readyButton');
+                readyButton.textContent = isReady ? '► NOT READY ◄' : '► READY ◄';
+                readyButton.style.borderColor = isReady ? 'var(--neon-green)' : 'var(--neon-cyan)';
+                readyButton.style.color = isReady ? 'var(--neon-green)' : 'var(--neon-cyan)';
+            } catch (error) {
+                console.error('Error toggling ready:', error);
+            }
+        }
+
+        function startMultiplayerGame() {
+            clearInterval(updateInterval);
+            document.getElementById('lobbyScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            currentQuestion = 0;
+            score = 0;
+
+            // Select 10 random questions from the pool
+            const shuffled = shuffleArray(triviaQuestions);
+            gameQuestions = shuffled.slice(0, 10);
+            
+            loadQuestion();
+            
+            updateInterval = setInterval(updateLiveScores, 2000);
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= gameQuestions.length) {
+                endMultiplayerGame();
+                return;
+            }
+
+            const question = gameQuestions[currentQuestion];
+            
+            document.getElementById('questionNumber').textContent = `QUESTION ${String(currentQuestion + 1).padStart(2, '0')}`;
+            document.getElementById('questionCounter').textContent = `${currentQuestion + 1}/10`;
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('currentScore').textContent = score;
+
+            const answersContainer = document.getElementById('answersContainer');
+            answersContainer.innerHTML = '';
+
+            question.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = `${String.fromCharCode(65 + index)}. ${answer}`;
+                btn.onclick = () => selectAnswer(index);
+                answersContainer.appendChild(btn);
+            });
+        }
+
+        async function selectAnswer(selectedIndex) {
+            const question = gameQuestions[currentQuestion];
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === question.correct) {
+                buttons[selectedIndex].classList.add('correct');
+                score += 100;
+                document.getElementById('currentScore').textContent = score;
+            } else {
+                buttons[selectedIndex].classList.add('incorrect');
+                buttons[question.correct].classList.add('correct');
+            }
+
+            currentQuestion++;
+
+            try {
+                const roomData = await window.storage.get(`room:${currentRoomId}`, true);
+                if (roomData) {
+                    const room = JSON.parse(roomData.value);
+                    if (room.players[currentPlayer]) {
+                        room.players[currentPlayer].score = score;
+                        room.players[currentPlayer].currentQuestion = currentQuestion;
+                        await window.storage.set(`room:${currentRoomId}`, JSON.stringify(room), true);
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating score:', error);
+            }
+
+            setTimeout(() => {
+                loadQuestion();
+            }, 1500);
+        }
+
+        async function updateLiveScores() {
+            try {
+                const roomData = await window.storage.get(`room:${currentRoomId}`, true);
+                if (!roomData) return;
+
+                const room = JSON.parse(roomData.value);
+                const players = Object.values(room.players);
+                players.sort((a, b) => b.score - a.score);
+
+                const liveScoresList = document.getElementById('liveScoresList');
+                liveScoresList.innerHTML = '';
+
+                players.forEach(player => {
+                    const div = document.createElement('div');
+                    div.className = 'live-score-item';
+                    div.innerHTML = `
+                        <span>${player.name}</span>
+                        <span>${player.score} pts</span>
+                    `;
+                    liveScoresList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error updating live scores:', error);
+            }
+        }
+
+        async function endMultiplayerGame() {
+            clearInterval(updateInterval);
+
+            try {
+                const roomData = await window.storage.get(`room:${currentRoomId}`, true);
+                if (!roomData) return;
+
+                const room = JSON.parse(roomData.value);
+                room.finished = true;
+                await window.storage.set(`room:${currentRoomId}`, JSON.stringify(room), true);
+
+                const players = Object.values(room.players);
+                players.sort((a, b) => b.score - a.score);
+
+                const winner = players[0];
+
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('winnerScreen').classList.remove('hidden');
+                
+                document.getElementById('winnerName').textContent = winner.name;
+                document.getElementById('winnerScore').textContent = `${winner.score} POINTS`;
+
+                const finalStandingsList = document.getElementById('finalStandingsList');
+                finalStandingsList.innerHTML = '';
+
+                players.forEach((player, index) => {
+                    const div = document.createElement('div');
+                    div.className = `standing-item ${index === 0 ? 'first' : ''}`;
+                    div.innerHTML = `
+                        <span class="standing-rank">#${index + 1}</span>
+                        <span class="standing-name">${player.name}</span>
+                        <span class="standing-score">${player.score}</span>
+                    `;
+                    finalStandingsList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error ending game:', error);
+            }
+        }
+
+        async function leaveRoom() {
+            try {
+                const roomData = await window.storage.get(`room:${currentRoomId}`, true);
+                if (roomData) {
+                    const room = JSON.parse(roomData.value);
+                    delete room.players[currentPlayer];
+                    
+                    if (Object.keys(room.players).length === 0) {
+                        await window.storage.delete(`room:${currentRoomId}`, true);
+                    } else {
+                        await window.storage.set(`room:${currentRoomId}`, JSON.stringify(room), true);
+                    }
+                }
+            } catch (error) {
+                console.error('Error leaving room:', error);
+            }
+
+            clearInterval(updateInterval);
+            returnToStart();
+        }
+
+        function returnToStart() {
+            clearInterval(updateInterval);
+            document.getElementById('lobbyScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('winnerScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            
+            document.getElementById('playerName').value = '';
+            document.getElementById('roomIdInput').value = '';
+            currentPlayer = '';
+            currentRoomId = '';
+            currentQuestion = 0;
+            score = 0;
+            isReady = false;
+            gameQuestions = [];
+        }
+    </script>
+</body>
+</html>
